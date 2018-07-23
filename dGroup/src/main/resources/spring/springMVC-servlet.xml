@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	<context:annotation-config/>
+	<mvc:annotation-driven/>
+	
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+	<context:component-scan base-package="com.dGroup"  use-default-filters="false">
+	  <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	  <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	  <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" />
+	</context:component-scan> 	
+
+
+
+	<!-- spring4.x -->
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">  
+	    <property name="messageConverters">  
+	        <list>  
+	            <ref bean="jsonHttpMessageConverter" />  
+	        </list>  
+	    </property>  
+	</bean>  
+	  
+	<bean id="jsonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">  
+	    <property name="supportedMediaTypes">  
+	        <list>  
+	            <value>application/json;charset=UTF-8</value>  
+	        </list>  
+	    </property>  
+	</bean> 
+	
+
+	<!-- <mvc:resources mapping="/images/**" location="/static_resources/images/"/>  -->
+	<mvc:resources location="/resources/" mapping="/resources/**"/>
+	<mvc:resources location="/upload/" mapping="/upload/**"/>
+	<mvc:default-servlet-handler/>
+	
+	<!--
+	<mvc:default-servlet-handler/>
+	-->
+	<!-- 对模型视图名称的解析，在请求时模型视图名称添加前后缀 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/WEB-INF/jsplibrary/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>	
+	
+    
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <property name="defaultEncoding" value="utf-8"></property>   
+        <property name="maxUploadSize" value="10485760000"></property>  
+        <property name="maxInMemorySize" value="40960"></property>  
+   	</bean>     
+	
+	<!-- 
+	<mvc:redirect-view-controller path="/" redirect-url="/login"/>
+
+    <mvc:view-controller path="/*"/>
+    -->	
+</beans>
