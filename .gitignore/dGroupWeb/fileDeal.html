@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript" src="js/jquery.1.9.1.min.js"></script>
+		<script type="text/javascript" src="js/jquery.nicescroll.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+		<link rel="stylesheet" href="js/bootstrap-3.3.7-dist/css/bootstrap.css" />
+		<script type="text/javascript" src="js/layer/layer.js"></script>
+
+	</head>
+
+	<body style="padding: 100px;">
+		<form class="form-inline" style="margin: 10px;">
+			<div class="form-group">
+				<label for="keyword" class="sr-only">地址查詢</label>
+				<input class="form-control" id="keyword" placeholder="地址查詢">
+			</div>
+			<button onclick="initData()" type="button" id="keywordButton" class="btn btn-default">地址查詢</button>
+			<button id="add" class="btn btn-default col-xs-offset-8" type="button">新增目录</button>
+		</form>
+		<table class="table table-hover table-striped">
+			<thead>
+				<th>序号</th>
+				<th>名称</th>
+				<th>大小</th>
+				<th>变更时间</th>
+				<th>操作</th>
+			</thead>
+			<tbody id="tbody">
+
+			</tbody>
+			<tr id="nodata">
+				<td colspan="5" style="font-size: 20px;text-align: center;">暫無數據，請查詢</td>
+			</tr>
+		</table>
+	</body>
+	<script>
+		var baseUrl = 'http://127.0.0.1:8081'
+		var nowFiles = [];
+		var nowBasePath = '';
+		var noweditName = '';
+
+		function initData() {
+			$.ajax({
+				url: baseUrl + '/dGroup/fileDeal/getList',
+				data: { basePath: $("#keyword").val() },
+				type: "post",
+				dataType: "text",
+				success: function(data) {
+					var j = JSON.parse(data);
+					var html = '';
+					count = 1;
+					nowFiles = [];
+					for(i in j) {
+						nowFiles.push(j[i].fileName);
+						html += "<tr><td>" + count + "</td>"
+						html += "<td>" + j[i].fileName + "</td>"
+						html += "<td>" + j[i].size + "</td>"
+						html += "<td>" + j[i].createTime + "</td>"
+						html += "<td>" + "<button type='button' class='btn btn-info' onclick='editFile(\"" + j[i].fileName + "\")'>修改</button>"
+						html += "<button type='button' class='btn btn-warning' onclick='deleteFile(\"" + j[i].fileName + "\")'>删除</button>" + "</td></tr>"
+						count++;
+					}
+					$('#tbody').html('');
+					$("#nodata").hide();
+					$('#tbody').append(html);
+					nowBasePath = $("#keyword").val();
+				},
+				error: function(data) {
+					$("#nodata").show();
+				}
+			})
+		}
+
+		$("#add").click(function() {
+			$.ajax({
+				url: baseUrl + '/dGroup/fileDeal/getList',
+				data: { basePath: $("#keyword").val() },
+				type: "post",
+				dataType: "text",
+				success: function(data) {
+					nowBasePath = $("#keyword").val();
+					layer.open({
+						type: 2,
+						area: ['400px', '200px'],
+						fixed: false, //不固定
+						maxmin: true,
+						content: 'addFile.html'
+					});
+				},
+				error: function(data) {
+					layer.msg('文件根目录不存在，请填写正确目录', { icon: 2 });
+				}
+			})
+		})
+
+		function deleteFile(path) {
+			path = nowBasePath + '/' + path;
+			layer.confirm('确认删除？', {
+				btn: ['是', '否'] //按钮
+			}, function() {
+				$.ajax({
+					url: baseUrl + '/dGroup/fileDeal/delete',
+					data: { folderPath: path },
+					type: "post",
+					dataType: "text",
+					success: function(data) {
+						if(data != 0) {
+							layer.msg('成功删除', { icon: 1 });
+							initData();
+						} else {
+							layer.msg('删除失败，没有权限', { icon: 2 });
+						}
+
+					},
+					error: function(data) {
+						layer.msg('删除失败，没有权限', { icon: 2 });
+					}
+				})
+			}, function() {
+
+			});
+
+		}
+
+		function editFile(path) {
+			noweditName = path;
+			layer.open({
+				type: 2,
+				area: ['400px', '200px'],
+				fixed: false, //不固定
+				maxmin: true,
+				content: 'editFile.html'
+			});
+		}
+	</script>
+
+</html>

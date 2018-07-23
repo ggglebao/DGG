@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="js/bootstrap-3.3.7-dist/css/bootstrap.css" />
+	</head>
+
+	<body>
+		<form style="padding: 20px;">
+			<div class="form-group">
+				<label for="fileName">目录名称</label>
+				<input type="text" class="form-control" id="fileName" placeholder="目录名称">
+			</div>
+			<button type="button" style="float: right;" class="btn btn-default">保存</button>
+		</form>
+	</body>
+	<script type="text/javascript" src="js/jquery.1.9.1.min.js"></script>
+	<script type="text/javascript" src="js/layer/layer.js"></script>
+	<script>
+		var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+		$(function() {
+			$("#fileName").val(parent.noweditName)
+		})
+		$('button').on('click', function() {
+			if($("#fileName").val() === parent.noweditName) {
+				parent.initData();
+				parent.layer.close(index);
+			}
+			if(!$("#fileName").val() || $("#fileName").val() == '') {
+				parent.layer.msg('目录名称不为空', { shade: 0.3 })
+				return;
+			}
+
+			if($.inArray($("#fileName").val(), parent.nowFiles) != -1) {
+				parent.layer.msg('目录已存在', { shade: 0.3 })
+				return;
+			}
+			$.ajax({
+				url: parent.baseUrl + '/dGroup/fileDeal/edit',
+				data: { forlderPth: parent.nowBasePath + '/' + parent.noweditName, newName: $("#fileName").val() },
+				type: "post",
+				dataType: "text",
+				success: function(data) {
+					parent.initData();
+					layer.msg('修改成功', { icon: 1 });
+					parent.layer.close(index);
+				},
+				error: function(data) {
+					layer.msg('文件名格式错误', { icon: 2 });
+				}
+			})
+
+		});
+	</script>
+
+</html>
